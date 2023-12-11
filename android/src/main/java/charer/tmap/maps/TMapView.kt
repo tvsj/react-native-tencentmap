@@ -37,7 +37,7 @@ class TMapView(context: Context) : TextureMapView(context) ,LocationSource, Tenc
   //用于访问腾讯定位服务的类, 周期性向客户端提供位置更新
   //创建定位请求
   private var locationRequest = TencentLocationRequest.create();
-  
+
   private val eventEmitter: RCTEventEmitter = (context as ThemedReactContext).getJSModule(RCTEventEmitter::class.java)
 
   private val markers = HashMap<String, TMapMarker>()
@@ -47,16 +47,16 @@ class TMapView(context: Context) : TextureMapView(context) ,LocationSource, Tenc
     locationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_FOLLOW_NO_CENTER)
     locationStyle
   }
-  
+
   private var mContext = context;
-  
+
   init {
     TencentMapInitializer.setAgreePrivacy(true);
     map.setLocationSource(this)
-    
+
     //设置定位周期（位置监听器回调周期）为3s
     locationRequest.interval = 3000;
-    
+
     map.setOnMapClickListener { latLng ->
       for (marker in markers.values) {
         marker.active = false
@@ -71,7 +71,7 @@ class TMapView(context: Context) : TextureMapView(context) ,LocationSource, Tenc
 
     map.setOnMyLocationChangeListener { location ->
       Log.d(TAG, "OnMyLocationChangeListener:位置变化监听 ")
-      
+
       val event = Arguments.createMap()
       event.putDouble("latitude", location.latitude)
       event.putDouble("longitude", location.longitude)
@@ -81,14 +81,14 @@ class TMapView(context: Context) : TextureMapView(context) ,LocationSource, Tenc
       event.putDouble("speed", location.speed.toDouble())
       event.putDouble("timestamp", location.time.toDouble())
       emit(id, "onLocation", event)
-     
+
 
     }
 
     map.setOnMarkerClickListener(TencentMap.OnMarkerClickListener {  marker ->
       markers[marker.id]?.let {
         it.active = true
-      
+
         val map = Arguments.createMap();
         map.putString("title", it.title)
         map.putDouble("latitude", marker.position.latitude)
@@ -169,10 +169,8 @@ class TMapView(context: Context) : TextureMapView(context) ,LocationSource, Tenc
 
   override fun deactivate() {
     //当不需要展示定位点时，需要停止定位并释放相关资源
-//    locationManager.removeUpdates(this.context)
-//    locationManager = null
+    locationManager.removeUpdates(this)
     locationRequest = null
-//    locationChangedListener = null
   }
   fun emitCameraChangeEvent(event: String, position: CameraPosition?) {
     position?.let {
