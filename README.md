@@ -13,14 +13,17 @@ npm install @charer/react-native-tencentmap
 ```js
 import { MapView } from '@charer/react-native-tencentmap';
 
-// ...
-
 <MapView style={{ flex: 1 }}
         zoomEnabled={true}
         zoomControlEnabled={true}
-        showsUserLocation={true}
+        myLocationEnable={true}
+        locationEnabled={true}
+        locationType={'location_rotate_no_center'}
+        showsLocationButton={true}
         showsCompass={true}
-        showsScale={true}
+        onLocation={(t)=>console.log('onLocationChanged',t)}
+        onClick={(nativeEvent) => console.log(nativeEvent)}
+        onPress={(nativeEvent) => console.log('press',nativeEvent)}
         center={{
           latitude: 22.829168,
           longitude: 108.355375
@@ -40,6 +43,14 @@ import { MapView } from '@charer/react-native-tencentmap';
         />
       </MapView>
 ```
+## 功能
+- 地图显示、点击事件
+- 显示定位
+- marker点、自定义、点击事件、点击显示infowindow
+
+## 未来
+-- Polyline
+-- Polygon
 
 ## Contributing
 
