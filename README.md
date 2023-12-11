@@ -9,7 +9,11 @@ npm install @charer/react-native-tencentmap
 ```
 
 ## Usage
-
+修改项目Androidmanifest.xml 加入腾讯地图key
+<!--设置腾讯地图-->
+        <meta-data android:name="TencentMapSDK" android:value="5P5BZ-WAXWP-IKVDR-VLADM-4ZFCZ-W2FNM"/>
+      <!--设置腾讯地图 end-->
+<!--设置腾讯地图-->
 ```js
 import { MapView } from '@charer/react-native-tencentmap';
 
