@@ -19,6 +19,7 @@ import com.tencent.tencentmap.mapsdk.maps.model.MyLocationStyle
 internal class TMapViewManager : ViewGroupManager<TMapView>() {
   companion object {
     const val SET_STATUS = 1
+    const val FIT_BOUNDS = 2
   }
 
   override fun getName(): String {
@@ -35,19 +36,19 @@ internal class TMapViewManager : ViewGroupManager<TMapView>() {
   }
 
   override fun getCommandsMap(): Map<String, Int> {
-    return mapOf("setStatus" to SET_STATUS)
+    return mapOf("setStatus" to SET_STATUS,"fitBounds" to FIT_BOUNDS)
   }
 
 
-  override fun receiveCommand(overlay: TMapView, commandId: Int, args: ReadableArray?) {
+  override fun receiveCommand(map: TMapView, commandId: Int, args: ReadableArray?) {
     when (commandId) {
-      SET_STATUS -> overlay.animateTo(args)
+      SET_STATUS -> map.animateTo(args)
+      FIT_BOUNDS -> map.moveCamera(args)
     }
   }
 
   override fun addView(mapView: TMapView, child: View, index: Int) {
     mapView.add(child)
-//    super.addView(mapView, child, index)
   }
 
   override fun removeViewAt(parent: TMapView, index: Int) {
@@ -72,10 +73,6 @@ internal class TMapViewManager : ViewGroupManager<TMapView>() {
     view.map.isMyLocationEnabled = true
   }
 
-  @ReactProp(name = "showsIndoorSwitch")
-  fun setIndoorSwitchEnabled(view: TMapView, show: Boolean) {
-//    view.map.uiSettings.isIndoorSwitchEnabled = show
-  }
 
   @ReactProp(name = "showsBuildings")
   fun showBuildings(view: TMapView, show: Boolean) {

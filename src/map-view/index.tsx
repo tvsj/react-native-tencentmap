@@ -231,6 +231,14 @@ export default class MapView extends Component<MapViewProps> {
   setStatus(status: MapStatus, duration = 0) {
     this.call("setStatus", [status, duration]);
   }
+  /**
+   * 所有marker点可视
+   *
+   * @param points
+   */
+  fitBounds(points){
+    this.call("fitBounds", points);
+  }
 
   render() {
     const props = {
