@@ -135,8 +135,7 @@ export default class Marker extends Component<MarkerProps> {
         "rose",
         "violet",
         "yellow",
-      ]),
-      ios: PropTypes.oneOf(["red", "green", "purple"]),
+      ])
     }),
     icon: PropTypes.func,
     image: PropTypes.string,
@@ -155,8 +154,13 @@ export default class Marker extends Component<MarkerProps> {
   icon = null;
 
   componentDidUpdate() {
+
     if (this.icon && Platform.OS === "android") {
-      setTimeout(() => this.call("update"), 0);
+      setTimeout(() => {
+        this.call("update")
+        console.log('更新')
+
+      }, 0);
     }
   }
 

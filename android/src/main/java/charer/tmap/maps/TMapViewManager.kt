@@ -1,8 +1,13 @@
 package charer.tmap.maps
 
+import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
+import android.graphics.Color
+import android.os.Build
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import charer.tmap.toLatLng
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
@@ -48,7 +53,16 @@ internal class TMapViewManager : ViewGroupManager<TMapView>() {
   }
 
   override fun addView(mapView: TMapView, child: View, index: Int) {
-    mapView.add(child)
+//    val layoutParams = ViewGroup.LayoutParams(
+//      ViewGroup.LayoutParams.MATCH_PARENT,
+//      ViewGroup.LayoutParams.MATCH_PARENT
+//    )
+
+    // 应用布局参数
+//    child.layoutParams = layoutParams
+    mapView.add(child); // 添加子视图
+//    super.addView(mapView, child,index) // 子视图加入viewmanager管理
+//    mapView.requestLayout();
   }
 
   override fun removeViewAt(parent: TMapView, index: Int) {
@@ -70,7 +84,7 @@ internal class TMapViewManager : ViewGroupManager<TMapView>() {
 
   @ReactProp(name = "locationEnabled")
   fun setMyLocationEnabled(view: TMapView, enabled: Boolean) {
-    view.map.isMyLocationEnabled = true
+    view.map.setMyLocationEnabled(true)
   }
 
 
@@ -150,7 +164,7 @@ internal class TMapViewManager : ViewGroupManager<TMapView>() {
     val cameraSigma = CameraUpdateFactory.newCameraPosition(CameraPosition(
       center.toLatLng(),  //中心点坐标，地图目标经纬度
       view.map.cameraPosition.zoom,  //目标缩放级别
-      45f,  //目标倾斜角[0.0 ~ 45.0] (垂直地图时为0)
+      0f,  //目标倾斜角[0.0 ~ 45.0] (垂直地图时为0)
       0f)) //目标旋转角 0~360° (正北方为0)
     view.map.moveCamera(cameraSigma)
   }
@@ -160,10 +174,6 @@ internal class TMapViewManager : ViewGroupManager<TMapView>() {
     view.setRegion(region)
   }
 
-  @ReactProp(name = "limitRegion")
-  fun setLimitRegion(view: TMapView, limitRegion: ReadableMap) {
-    view.setLimitRegion(limitRegion)
-  }
 
   @ReactProp(name = "rotation")
   fun changeRotation(view: TMapView, rotation: Float) {

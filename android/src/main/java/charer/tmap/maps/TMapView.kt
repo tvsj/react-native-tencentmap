@@ -2,11 +2,9 @@ package charer.tmap.maps
 
 import android.content.ContentValues.TAG
 import android.content.Context
-import android.location.Location
-import android.os.Looper
 import android.util.Log
+import android.view.ContextMenu
 import android.view.View
-import android.widget.Toast
 import charer.tmap.toLatLng
 import charer.tmap.toLatLngBounds
 import charer.tmap.toWritableMap
@@ -16,32 +14,19 @@ import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.events.RCTEventEmitter
-import com.tencent.map.geolocation.TencentLocation
-import com.tencent.map.geolocation.TencentLocationListener
-import com.tencent.map.geolocation.TencentLocationManager
-import com.tencent.map.geolocation.TencentLocationRequest
 import com.tencent.tencentmap.mapsdk.maps.CameraUpdateFactory
-import com.tencent.tencentmap.mapsdk.maps.LocationSource
-import com.tencent.tencentmap.mapsdk.maps.LocationSource.OnLocationChangedListener
 import com.tencent.tencentmap.mapsdk.maps.TencentMap
 import com.tencent.tencentmap.mapsdk.maps.TencentMapInitializer
 import com.tencent.tencentmap.mapsdk.maps.TextureMapView
 import com.tencent.tencentmap.mapsdk.maps.model.CameraPosition
-import com.tencent.tencentmap.mapsdk.maps.model.IOverlay
 import com.tencent.tencentmap.mapsdk.maps.model.LatLng
 import com.tencent.tencentmap.mapsdk.maps.model.LatLngBounds
 import com.tencent.tencentmap.mapsdk.maps.model.Marker
 import com.tencent.tencentmap.mapsdk.maps.model.MyLocationStyle
 
 
-class TMapView(context: Context) : TextureMapView(context), LocationSource, TencentLocationListener {
-  private lateinit var locationChangedListener: OnLocationChangedListener;
-  private var locationManager: TencentLocationManager = TencentLocationManager(context)
-
-  //用于访问腾讯定位服务的类, 周期性向客户端提供位置更新
-  //创建定位请求
-  private var locationRequest = TencentLocationRequest.create();
-
+class TMapView(context: Context) : TextureMapView(context) {
+  private var locationListener: TMapLocationListener;
   private val eventEmitter: RCTEventEmitter = (context as ThemedReactContext).getJSModule(RCTEventEmitter::class.java)
 
   private val markers = HashMap<String, TMapMarker>()
@@ -52,21 +37,31 @@ class TMapView(context: Context) : TextureMapView(context), LocationSource, Tenc
     locationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_FOLLOW_NO_CENTER)
     locationStyle
   }
-
-  private var mContext = context;
-
   init {
     TencentMapInitializer.setAgreePrivacy(true);
-    map.setLocationSource(this)
+    locationListener = TMapLocationListener(context.applicationContext);
+    map.setLocationSource(locationListener)
 
-    //设置定位周期（位置监听器回调周期）为3s
-    locationRequest.interval = 3000;
+    map.setOnCameraChangeListener(object : TencentMap.OnCameraChangeListener {
+
+      override fun onCameraChange(position: CameraPosition?) {
+        emitCameraChangeEvent("onStatusChange", position)
+      }
+
+      override fun onCameraChangeFinished(position: CameraPosition?) {
+        Log.d(TAG, "onCameraChangeFinished: 完成了")
+        emitCameraChangeEvent("onStatusChangeComplete", position)
+
+      }
+    });
+
+
 
     map.setOnMapClickListener { latLng ->
       for (marker in markers.values) {
         marker.active = false
       }
-
+      Log.d(TAG, "地图点击了 ")
       emit(id, "onClick", latLng.toWritableMap())
     }
 
@@ -74,8 +69,9 @@ class TMapView(context: Context) : TextureMapView(context), LocationSource, Tenc
       emit(id, "onLongClick", latLng.toWritableMap())
     }
 
+
+
     map.setOnMyLocationChangeListener { location ->
-      Log.d(TAG, "OnMyLocationChangeListener:位置变化监听 ")
 
       val event = Arguments.createMap()
       event.putDouble("latitude", location.latitude)
@@ -90,18 +86,20 @@ class TMapView(context: Context) : TextureMapView(context), LocationSource, Tenc
 
     }
 
+
     map.setOnMarkerClickListener(TencentMap.OnMarkerClickListener { marker ->
       markers[marker.id]?.let {
         it.active = true
 
-        val map = Arguments.createMap();
-        map.putString("title", it.title)
-        map.putDouble("latitude", marker.position.latitude)
-        map.putDouble("longitude", marker.position.longitude)
+        val map1 = Arguments.createMap();
+        map1.putString("title", it.title)
+        map1.putDouble("latitude", marker.position.latitude)
+        map1.putDouble("longitude", marker.position.longitude)
         if (it.tag != null) {
-          map.putString("tag", it.tag.toString())
+          map1.putString("tag", it.tag.toString())
         }
-        emit(it.id, "onClick", map)
+        Log.d(TAG, "marker点击1111:到这里埌 ")
+        emit(id, "onClick", map1)
       }
       true
     })
@@ -119,16 +117,6 @@ class TMapView(context: Context) : TextureMapView(context), LocationSource, Tenc
         emit(markers[marker.id]?.id, "onDragEnd", marker.position.toWritableMap())
       }
     })
-//    map.setOnCameraChangeListener(TencentMap.OnCameraChangeListener{
-//      fun onCameraChange(position: CameraPosition?){
-//        emitCameraChangeEvent("onStatusChange", position)
-//      }
-//
-//      fun onCameraChangeFinished(position: CameraPosition?){
-//        emitCameraChangeEvent("onStatusChangeComplete", position)
-//
-//      }
-//    });
 
 
 //    map.setOnInfoWindowClickListener { marker ->
@@ -150,33 +138,27 @@ class TMapView(context: Context) : TextureMapView(context), LocationSource, Tenc
     map.setInfoWindowAdapter(TMapInfoWindowAdapter(context, markers))
   }
 
-  override fun activate(onLocationChangedListener: OnLocationChangedListener) {
-    //这里我们将地图返回的位置监听保存为当前 Activity 的成员变量
-    locationChangedListener = onLocationChangedListener
-    //开启定位
-    val err = locationManager.requestLocationUpdates(
-      locationRequest, this, Looper.myLooper())
-    Log.d(TAG, "activate情况: " + err)
-    when (err) {
-      1 -> Toast.makeText(context,
-        "设备缺少使用腾讯定位服务需要的基本条件",
-        Toast.LENGTH_SHORT).show()
 
-      2 -> Toast.makeText(context,
-        "manifest 中配置的 key 不正确", Toast.LENGTH_SHORT).show()
-
-      3 -> Toast.makeText(context,
-        "自动加载libtencentloc.so失败", Toast.LENGTH_SHORT).show()
-
-      else -> {}
-    }
+  override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+    super.onSizeChanged(w, h, oldw, oldh)
+    Log.d(TAG, "onSizeChanged: 改变size了"+w.toString()+" "+h.toString())
   }
 
-  override fun deactivate() {
-    //当不需要展示定位点时，需要停止定位并释放相关资源
-    locationManager.removeUpdates(this)
-    locationRequest = null
+  override fun onSurfaceChanged(surfaceTexture: Any?, width: Int, height: Int) {
+    super.onSurfaceChanged(surfaceTexture, width, height)
+    Log.d(TAG, "onSurfaceChanged: 改变surface了")
   }
+
+  override fun hasOnClickListeners(): Boolean {
+    Log.d(TAG, "hasOnClickListeners: "+super.hasOnClickListeners())
+    return super.hasOnClickListeners()
+  }
+
+  override fun setOnDragListener(l: OnDragListener?) {
+    super.setOnDragListener(l)
+
+  }
+
 
   fun emitCameraChangeEvent(event: String, position: CameraPosition?) {
     position?.let {
@@ -200,13 +182,14 @@ class TMapView(context: Context) : TextureMapView(context), LocationSource, Tenc
 
   fun add(child: View) {
     if (child is TMapOverlay) {
-      child.add(map)
+      child.add(map);
       if (child is TMapMarker) {
         markers[child.marker?.id!!] = child
       }
 //      if (child is TMapPolyline) {
 //        lines[child.polyline?.id!!] = child
 //      }
+
     }
   }
 
@@ -235,16 +218,16 @@ class TMapView(context: Context) : TextureMapView(context), LocationSource, Tenc
   fun moveCamera(args: ReadableArray?) {
 
     args?.let {
-      if(args.size()>1){
+      if (args.size() > 1) {
         val latLgs = ArrayList<LatLng>();
         for (i in 0 until args.size()) {
           val mk = args.getMap(i);
-          mk?.let { latLgs. add(LatLng (mk.getDouble("latitude"), mk.getDouble("longitude"))) };
+          mk?.let { latLgs.add(LatLng(mk.getDouble("latitude"), mk.getDouble("longitude"))) };
         }
         val boundsBuilder = LatLngBounds.Builder();
         boundsBuilder.include(latLgs)
         val bounds = boundsBuilder.build()
-        map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,200));
+        map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 200));
       }
 
     }
@@ -286,14 +269,6 @@ class TMapView(context: Context) : TextureMapView(context), LocationSource, Tenc
     map.moveCamera(CameraUpdateFactory.newLatLngBounds(region.toLatLngBounds(), 0))
   }
 
-  fun setLimitRegion(region: ReadableMap) {
-//    map.setMapStatusLimits(region.toLatLngBounds())
-  }
-
-  fun setMyLocationEnabled(enabled: Boolean) {
-    map.isMyLocationEnabled = enabled
-  }
-
 
   fun setLocationStyle(style: ReadableMap) {
     if (style.hasKey("fillColor")) {
@@ -314,27 +289,6 @@ class TMapView(context: Context) : TextureMapView(context), LocationSource, Tenc
     locationStyle.myLocationType(type)
     map.setMyLocationStyle(locationStyle)
 
-  }
-
-  override fun onLocationChanged(tencentLocation: TencentLocation, i: Int, s: String?) {
-    if (i === TencentLocation.ERROR_OK) {
-      val location: Location = Location(tencentLocation.provider)
-      //设置经纬度
-      location.latitude = tencentLocation.latitude;
-      location.longitude = tencentLocation.longitude
-      //设置精度，这个值会被设置为定位点上表示精度的圆形半径
-      location.accuracy = tencentLocation.accuracy
-      //设置定位标的旋转角度，注意 tencentLocation.getBearing() 只有在 gps 时才有可能获取
-//      location.setBearing((float) tencentLocation.getBearing());
-      //设置定位标的旋转角度，注意 tencentLocation.getDirection() 返回的方向，仅来自传感器方向，如果是gps，则直接获取gps方向
-      location.bearing = tencentLocation.bearing
-      //将位置信息返回给地图
-      locationChangedListener.onLocationChanged(location)
-    }
-  }
-
-  override fun onStatusUpdate(p0: String?, p1: Int, p2: String?) {
-    Log.d(TAG, "onStatusUpdate: " + p0)
   }
 
 

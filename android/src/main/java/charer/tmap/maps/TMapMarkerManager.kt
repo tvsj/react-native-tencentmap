@@ -25,7 +25,9 @@ internal class TMapMarkerManager : ViewGroupManager<TMapMarker>() {
   override fun addView(marker: TMapMarker, view: View, index: Int) {
     when (view) {
       is TMapInfoWindow ->  marker.infoWindow = view
-      else -> super.addView(marker, view, index)
+      else -> {
+        super.addView(marker, view, index)
+      }
 
     }
   }

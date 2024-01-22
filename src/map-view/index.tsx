@@ -180,6 +180,7 @@ const events = [
   "onClick",
   "onLongClick",
   "onStatusChange",
+  "onLoaded",
   "onStatusChangeComplete",
   "onLocation",
   "onAnimateCancel",

@@ -22,7 +22,7 @@ android {
   buildToolsVersion getExt('buildToolsVersion', '33.0.0')
 
   defaultConfig {
-    minSdkVersion getExt('minSdkVersion', 21)
+    minSdkVersion getExt('minSdkVersion', 26)
     targetSdkVersion getExt('targetSdkVersion', 33)
   }
 }
@@ -30,7 +30,7 @@ android {
 dependencies {
   compileOnly 'com.facebook.react:react-native:+'
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-  implementation 'com.tencent.map:tencent-map-vector-sdk:5.2.1'
+  implementation 'com.tencent.map:tencent-map-vector-sdk:5.4.1'
   implementation 'com.tencent.map:sdk-utilities:1.0.9'
   implementation 'com.tencent.map.geolocation:TencentLocationSdk-openplatform:7.5.3'
 }

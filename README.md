@@ -11,9 +11,10 @@ npm install @charer/react-native-tencentmap
 ## Usage
 修改项目Androidmanifest.xml 加入腾讯地图key
 <!--设置腾讯地图-->
-        <meta-data android:name="TencentMapSDK" android:value="5P5BZ-WAXWP-IKVDR-VLADM-4ZFCZ-W2FNM"/>
+        <meta-data android:name="TencentMapSDK" android:value="5P5BZ-WAXWP-IKVDR-VLADM-4ZFCZ-xxxx"/>
       <!--设置腾讯地图 end-->
 <!--设置腾讯地图-->
+<!-- marker点击事件从地图onClick出 -->
 ```js
 import { MapView } from '@charer/react-native-tencentmap';
 
@@ -27,7 +28,6 @@ import { MapView } from '@charer/react-native-tencentmap';
         showsCompass={true}
         onLocation={(t)=>console.log('onLocationChanged',t)}
         onClick={(nativeEvent) => console.log(nativeEvent)}
-        onPress={(nativeEvent) => console.log('press',nativeEvent)}
         center={{
           latitude: 22.829168,
           longitude: 108.355375

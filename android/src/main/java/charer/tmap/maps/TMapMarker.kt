@@ -116,12 +116,12 @@ class TMapMarker(context: Context) : ReactViewGroup(context), TMapOverlay {
   }
 
   override fun add(map: TencentMap) {
-
-    marker = map.addMarker(MarkerOptions()
+    var position1 = LatLng(position);
+    marker = map.addMarker(MarkerOptions(position1)
       .icon(bitmapDescriptor)
       .alpha(opacity)
       .draggable(draggable)
-      .position(position)
+//      .position(position)
       .anchor(anchorU, anchorV)
       .infoWindowEnable(!infoWindowDisabled)
       .title(title)
@@ -146,6 +146,7 @@ class TMapMarker(context: Context) : ReactViewGroup(context), TMapOverlay {
   fun updateIcon() {
     icon?.let {
       if (it.width != 0 && it.height != 0) {
+        Log.d(TAG, "updateIcon: 更新图标")
         val bitmap = Bitmap.createBitmap(
           it.width, it.height, Bitmap.Config.ARGB_8888)
         it.draw(Canvas(bitmap))
