@@ -53,12 +53,12 @@ import { MapView } from '@charer/react-native-tencentmap';
 - marker点、自定义、点击事件、点击显示infowindow
 
 ## 未来
--- Polyline
--- Polygon
+- Polyline
+- Polygon
 
-## Contributing
+## 已知问题
+- 如需自定义marker点的图片，需使用image属性进行指定，icon方式不生效
 
-See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the repository and the development workflow.
 
 ## License
 
