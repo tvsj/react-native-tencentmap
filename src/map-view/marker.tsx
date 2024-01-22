@@ -153,14 +153,11 @@ export default class Marker extends Component<MarkerProps> {
   nativeComponent = "TMapMarker";
   icon = null;
 
-  componentDidUpdate() {
-
+  componentDidUpdate(): void {
     if (this.icon && Platform.OS === "android") {
       setTimeout(() => {
         this.call("update")
-        console.log('更新')
-
-      }, 0);
+      }, 500);
     }
   }
 

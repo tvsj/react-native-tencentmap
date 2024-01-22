@@ -29,7 +29,7 @@ class TMapLocationListener(reactContext: Context) : ContextWrapper(reactContext)
 
   override fun onLocationChanged(tencentLocation: TencentLocation, i: Int, s: String?) {
     if (i === TencentLocation.ERROR_OK && locationChangedListener != null) {
-      Log.d(TAG, "onLocationChanged: 地图改变了")
+      // Log.d(TAG, "onLocationChanged: 地图改变了")
       val location = Location(tencentLocation.provider)
       //设置经纬度
       location.latitude = tencentLocation.latitude;

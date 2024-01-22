@@ -38,6 +38,7 @@ class TMapView(context: Context) : TextureMapView(context) {
     locationStyle
   }
   init {
+
     TencentMapInitializer.setAgreePrivacy(true);
     locationListener = TMapLocationListener(context.applicationContext);
     map.setLocationSource(locationListener)
@@ -90,7 +91,6 @@ class TMapView(context: Context) : TextureMapView(context) {
     map.setOnMarkerClickListener(TencentMap.OnMarkerClickListener { marker ->
       markers[marker.id]?.let {
         it.active = true
-
         val map1 = Arguments.createMap();
         map1.putString("title", it.title)
         map1.putDouble("latitude", marker.position.latitude)
@@ -98,7 +98,6 @@ class TMapView(context: Context) : TextureMapView(context) {
         if (it.tag != null) {
           map1.putString("tag", it.tag.toString())
         }
-        Log.d(TAG, "marker点击1111:到这里埌 ")
         emit(id, "onClick", map1)
       }
       true
@@ -141,7 +140,7 @@ class TMapView(context: Context) : TextureMapView(context) {
 
   override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
     super.onSizeChanged(w, h, oldw, oldh)
-    Log.d(TAG, "onSizeChanged: 改变size了"+w.toString()+" "+h.toString())
+//    Log.d(TAG, "onSizeChanged: 改变size了"+w.toString()+" "+h.toString())
   }
 
   override fun onSurfaceChanged(surfaceTexture: Any?, width: Int, height: Int) {

@@ -121,10 +121,10 @@ class TMapMarker(context: Context) : ReactViewGroup(context), TMapOverlay {
       .icon(bitmapDescriptor)
       .alpha(opacity)
       .draggable(draggable)
-//      .position(position)
       .anchor(anchorU, anchorV)
       .infoWindowEnable(!infoWindowDisabled)
       .title(title)
+      .fastLoad(false)
       .snippet(snippet)
       .zIndex(zIndex))
 

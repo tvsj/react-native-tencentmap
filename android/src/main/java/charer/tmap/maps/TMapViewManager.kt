@@ -1,13 +1,10 @@
 package charer.tmap.maps
 
-import android.annotation.SuppressLint
+
 import android.content.ContentValues.TAG
-import android.graphics.Color
-import android.os.Build
 import android.util.Log
 import android.view.View
-import android.view.ViewGroup
-import androidx.annotation.RequiresApi
+
 import charer.tmap.toLatLng
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
@@ -18,6 +15,7 @@ import com.facebook.react.uimanager.annotations.ReactProp
 import com.tencent.tencentmap.mapsdk.maps.CameraUpdateFactory
 import com.tencent.tencentmap.mapsdk.maps.model.CameraPosition
 import com.tencent.tencentmap.mapsdk.maps.model.MyLocationStyle
+import java.util.ArrayList
 
 
 @Suppress("unused")
@@ -53,21 +51,19 @@ internal class TMapViewManager : ViewGroupManager<TMapView>() {
   }
 
   override fun addView(mapView: TMapView, child: View, index: Int) {
-//    val layoutParams = ViewGroup.LayoutParams(
-//      ViewGroup.LayoutParams.MATCH_PARENT,
-//      ViewGroup.LayoutParams.MATCH_PARENT
-//    )
-
     // 应用布局参数
-//    child.layoutParams = layoutParams
     mapView.add(child); // 添加子视图
-//    super.addView(mapView, child,index) // 子视图加入viewmanager管理
-//    mapView.requestLayout();
+//    mapView.addView(child, index)
+
+    Log.d(TAG, "addView:添加子视图 ${mapView.childCount} ${index}")
+    super.addView(mapView, child,index) // 子视图加入viewmanager管理
+
   }
 
-  override fun removeViewAt(parent: TMapView, index: Int) {
-    parent.remove(parent.getChildAt(index))
-    super.removeViewAt(parent, index)
+  override fun removeViewAt(mapView: TMapView, index: Int) {
+    Log.d(TAG, "removeViewAt:移除子视图 ${mapView.childCount} ${index}")
+    mapView.remove(mapView.getChildAt(index));
+    super.removeViewAt(mapView,index);
   }
 
   override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any> {
